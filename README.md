@@ -1,6 +1,6 @@
 # CPP Image Pipeline (v0.X)
 
-The following will decribe the procudures to be able to construct, compile and build project with edited sources scripts.
+The following will decribe the procudures to be able to construct, compile and build project with edited sources scripts on Windows.
 
 ## Dependencies
 
@@ -8,21 +8,21 @@ The following will decribe the procudures to be able to construct, compile and b
 
 *Download link : https://sourceforge.net/projects/mingw-w64/files/*
 
-Reference it to `Path` environnement variable :  
+Reference it to `Path` environnement variable of system as following :  
 C:\...\mingw64\bin
 
 ### CMake
 
 *Download link : https://cmake.org/download/*
 
-Reference it to `Path` environnement variable :  
+Reference it to `Path` environnement variable of system as following :  
 C:\...\CMake\bin
 
 ### OpenCV – 3.4.1X
 
 *Download link : https://opencv.org/releases/*
 
-Reference it to `Path` environnement variable :  
+Reference it to `Path` environnement variable of system as following :  
 C:\...\opencv\build\x64\mingw\bin  
 C:\...\opencv\build\x64\mingw\lib
 
