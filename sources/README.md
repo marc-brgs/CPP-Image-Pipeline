@@ -48,7 +48,7 @@ cmake --version
 cmake . -G "MinGW Makefiles"
 ```
 
-- Build  
+- Build (compile)  
 ```
 mingw32-make.exe
 ```
