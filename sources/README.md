@@ -18,7 +18,7 @@ C:\...\mingw64\bin
 Reference it to `Path` environnement variable :  
 C:\...\CMake\bin
 
-### OpenCV – 3.4.X
+### OpenCV – 3.4.1X
 
 *Download link : https://opencv.org/releases/*
 
