@@ -1,0 +1,3 @@
+load toto.png in img1
+convertInGray img1 in gray1
+save gray1 in result.png
