@@ -8,21 +8,21 @@ The following will decribe the procudures to be able to construct, compile and b
 
 *Download link : https://sourceforge.net/projects/mingw-w64/files/*
 
-Then reference it to "Path" environnement variable :  
+Reference it to `Path` environnement variable :  
 C:\...\mingw64\bin
 
 ### CMake
 
 *Download link : https://cmake.org/download/*
 
-Path environnement variable :  
+Reference it to `Path` environnement variable :  
 C:\...\CMake\bin
 
 ### OpenCV – 3.4.X
 
 *Download link : https://opencv.org/releases/*
 
-Then reference it to "Path" environnement variable :
+Reference it to `Path` environnement variable :  
 C:\...\opencv\build\x64\mingw\bin  
 C:\...\opencv\build\x64\mingw\lib
 
