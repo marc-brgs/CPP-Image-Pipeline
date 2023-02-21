@@ -1,6 +1,6 @@
-# CPP Image Pipeline (v0.X)
+# CPP Image Pipeline (v0.1)
 
-The following will decribe the procudures to be able to construct, compile and build project with edited sources scripts on Windows.
+The following will decribe the procedures to be able to construct, compile and build project with edited sources scripts on Windows.
 
 ## Dependencies
 
