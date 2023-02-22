@@ -1,3 +1,7 @@
-load toto.png in img1
-convertInGray img1 in gray1
-save gray1 in result.png
+load antoine-griezmann.png as img1
+load cat-cry.jpg as img2
+brightness img1 40
+brightness img1 40
+save img1 as result.png
+brightness img2 -100
+save img2 as result.png

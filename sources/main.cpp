@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <array>
+#include <map>
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -13,6 +14,7 @@
 using namespace std;
 using namespace cv;
 
+void printHeader();
 void printLine(string text);
 void printSubLine(string text);
 void printSubLineError(string text);
@@ -31,7 +33,6 @@ int vcap(int value);
 
 int main(int argc, char** argv) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, 14); // Set console color
 
     // Colors test
     /*for(int k = 0; k < 255; k++) {
@@ -39,8 +40,136 @@ int main(int argc, char** argv) {
         cout << k << " test" << endl;
     }*/
 
-    // Header
-    SetConsoleTextAttribute(hConsole, 14);
+     // Program init and locate steps file
+    printHeader();
+
+    printLine("Program start");
+
+    printLine("Loading pipeline-steps.txt");
+
+	ifstream file("pipeline-steps.txt");
+    if (!file.is_open()) {
+		printSubLineError("[!] Error : Unable to open the file");
+        return 0;
+    }
+
+    // Read lines
+    string line;
+	vector<vector<string>> ope_buffer;
+	int load_count = 0;
+
+     SetConsoleTextAttribute(hConsole, 8);
+    while(getline(file, line)) {
+		vector<string> line_buffer;
+		string delimiter = " ";
+
+		size_t pos = 0;
+		string token;
+        cout << line << endl;
+		while((pos = line.find(delimiter)) != string::npos) {
+			token = line.substr(0, pos);
+			line_buffer.push_back(token);
+			line.erase(0, pos + delimiter.length());
+		}
+        line_buffer.push_back(line); // last token of the line
+
+		if(line_buffer.at(0) == "load")
+            load_count++;
+        
+		ope_buffer.push_back(line_buffer);
+    }
+
+    file.close();
+
+	int operation_count = ope_buffer.size() - load_count;
+    stringstream sstm;
+    sstm << ope_buffer.size() << " lines (" << load_count << " load, " << operation_count << " operations)";
+    printSubLine(sstm.str());
+
+	// Processing steps
+	map<string, Mat> stored_images;
+
+	for(int i = 0; i < ope_buffer.size(); i++) {
+		vector<string> action = ope_buffer.at(i);
+		string action_id = action.at(0);
+
+		string line = "";
+		for(int k = 0; k < action.size(); k++) {
+			line += action.at(k) + " ";
+		}
+        stringstream sstm2;
+        sstm2 << "[" << i+1 << "/" << ope_buffer.size() << "] - " << line;
+		printLine(sstm2.str());
+
+        if(action_id == "load") {
+            if(action.size() != 4) { // load image.jpg as img1
+                printSubLineError("[!] Error : Load command should have 4 components");
+                return 0;
+            }
+            string path = action.at(1);
+            string variable_name = action.at(3);
+            printSubLine("Loading " + path);
+
+            Mat img = imread(path, IMREAD_COLOR);
+            if(img.empty()) {
+                printSubLineError("[!] Error : Could not read the image");
+                return 0;
+            }
+            stored_images.insert({variable_name, img});
+        }
+        else if (action_id == "save") {
+            if(action.size() != 4) {
+                printSubLineError("[!] Error : Brightness command should have 4 components");
+                return 0;
+            }
+            string variable_name = action.at(1);
+            string file_name = action.at(3);
+            auto it = stored_images.find(variable_name);
+
+            if (it == stored_images.end()) {
+                printSubLineError("[!] Error : Image name "+ variable_name +" not declared");
+                return 0;
+            }
+
+            stringstream sstm3;
+            sstm3 << "Saving " << variable_name << " as " << file_name;
+            printSubLine(sstm3.str());
+            imwrite(file_name, it->second);
+        }
+        else if(action_id == "brightness") {
+            if(action.size() != 3) {
+					printSubLineError("[!] Error : Brightness command should have 3 components");
+					return 0;
+				}
+				string variable_name = action.at(1);
+				int dec = stoi(action.at(2));
+				auto it = stored_images.find(variable_name);
+
+				if (it == stored_images.end()) {
+					printSubLineError("[!] Error : Image name "+ variable_name +" not declared");
+					return 0;
+				}
+
+				it->second = brightness(it->second, dec);
+                stringstream sstm3;
+                sstm3 << "Step " << (i+1) << "/" << ope_buffer.size() << " - " << variable_name;
+				imshow(sstm3.str(), it->second);
+				waitKey(0);
+        }
+        else {
+            printSubLineError("[!] Error : Unknown action in pipeline-steps.txt");
+				return 0;
+        }
+	}
+
+    printLine("Program end");
+    cout << endl;
+    return 0;
+}
+
+void printHeader() {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 14);
     cout << "*-------------------------------*" << endl;
     cout << "|";
     SetConsoleTextAttribute(hConsole, 224);
@@ -48,74 +177,6 @@ int main(int argc, char** argv) {
     SetConsoleTextAttribute(hConsole, 14);
     cout << "|" << endl;
     cout << "*-------------------------------*" << endl << endl;
-
-    printLine("Program start");
-
-    printLine("Loading pipeline-steps.txt");
-    printSubLine("10 lines (2 images load, 8 operations)");
-
-    // Load images
-    string path = "C:\\Users/marcb/Pictures/cat-cry.jpg";
-    printLine("Loading " + path);
-    Mat img = imread(path, IMREAD_COLOR);
-
-    if(img.empty()) {
-        printSubLineError("[!] Error : Could not read the image");
-        return 0;
-    }
-
-    string path2 = "C:\\Users/marcb/Pictures/antoine-griezmann-pp.png";
-    printLine("Loading " + path2);
-    Mat img2 = imread(path2, IMREAD_COLOR);
-
-    if(img2.empty()) {
-        printSubLineError("[!] Error : Could not read the image");
-        //cout << "\033[0m"; // Reset console color
-        return 0;
-    }
-
-    // Process images
-    int step = 0;
-
-    img = brightness(img, 40);
-    step++;
-    imshow("Image", img);
-    waitKey(0);
-
-    img = product(img, img2);
-    step++;
-    imshow("Image", img);
-    waitKey(0);
-
-
-    img = add(img, img2);
-    step++;
-    imshow("Image", img);
-    waitKey(0);
-
-    printLine("Program end");
-    cout << endl;
-    return 0;
-
-    /*cout << "You have entered " << argc
-         << " arguments:" << "\n";
-
-    for (int i = 0; i < argc; ++i)
-        cout << argv[i] << "\n";
-
-    ifstream file("../pipeline-steps.txt");
-    if (!file.is_open()) {
-        cerr << "Impossible d'ouvrir le fichier!" << endl;
-        return 1;
-    }
-
-    // Read lines
-    string line;
-    while (getline(file, line)) {
-        cout << line << endl;
-    }
-
-    file.close();*/
 }
 
 void printLine(string text) {
