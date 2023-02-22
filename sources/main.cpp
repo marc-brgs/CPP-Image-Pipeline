@@ -198,7 +198,7 @@ void printSubLine(string text) {
 void printSubLineError(string text) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, 12); // Set to light red
-    cout << "\\ ";
+    cout << " \\ ";
     cout << text << endl;
     SetConsoleTextAttribute(hConsole, 15); // Set to white
 }
