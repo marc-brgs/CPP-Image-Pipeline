@@ -190,7 +190,7 @@ void printLine(string text) {
 void printSubLine(string text) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, 14); // Set to light yellow
-    cout << "\\ ";
+    cout << " \\ ";
     SetConsoleTextAttribute(hConsole, 15); // Set to white
     cout << text << endl;
 }
