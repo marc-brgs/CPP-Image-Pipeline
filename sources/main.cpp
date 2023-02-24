@@ -28,6 +28,7 @@ void showImage(string title, Mat img);
 // Global variables declaration
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 map<string, Mat> stored_images;
+map<string, string> images_path;
 
 int main(int argc, char** argv) {
 
@@ -88,7 +89,7 @@ int main(int argc, char** argv) {
 
 	for(int i = 0; i < lines_count; i++) {
 		vector<string> action = lines_comp.at(i);
-		string action_id = action.at(0);
+		string command_id = action.at(0);
 
 		string line = "";
 		for(int k = 0; k < action.size(); k++) {
@@ -98,7 +99,7 @@ int main(int argc, char** argv) {
         sstm2 << "[" << i+1 << "/" << lines_count << "] - " << line;
 		printLine(sstm2.str());
 
-        if(action_id == "load") { // ex: load image.png as img1
+        if(command_id == "load") { // ex: load image.png as img1
             checkLength(action, 4);
 
             string path = action.at(1);
@@ -111,12 +112,13 @@ int main(int argc, char** argv) {
                 return 0;
             }
             stored_images.insert({image_name, img});
+            images_path.insert({image_name, path});
         }
-        else if(action_id == "load_mask") { // ex: load_mask mask.png as mask1
+        else if(command_id == "load_mask") { // ex: load_mask mask.png as mask1
             checkLength(action, 4);
 
-            string path = action.at(1);
-            string image_name = action.at(3);
+            string path = action[1];
+            string image_name = action[3];
             printSubLine("Loading mask " + path);
 
             Mat img = imread(path, IMREAD_GRAYSCALE);
@@ -126,7 +128,7 @@ int main(int argc, char** argv) {
             }
             stored_images.insert({image_name, img});
         }
-        else if(action_id == "save") { // ex: save img1 as result.png
+        else if(command_id == "save") { // ex: save img1 as result.png
             checkLength(action, 4);
 
             string image_name = action.at(1);
@@ -136,11 +138,29 @@ int main(int argc, char** argv) {
             printSubLine("Saving "+ image_name +" as "+ file_name);
             imwrite(file_name, img);
         }
-        else if(action_id == "brightness") { // ex: brightness img1 40
+        else if (command_id == "reset") { // ex: reset img1
+            checkLength(action, 2);
+
+            string image_name = action[1];
+            Mat& img = getImage(image_name);
+
+            auto it = images_path.find(image_name);
+
+            if (it == images_path.end()) {
+                printSubLineError("[!] Error : Image name "+ image_name +" not declared");
+                exit(0);
+            }
+
+            img = imread(it->second, IMREAD_COLOR);
+            
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
+        else if(command_id == "brightness") { // ex: brightness img1 40
             checkLength(action, 3);
 
-			string image_name = action.at(1);
-			int dec = stoi(action.at(2));
+			string image_name = action[1];
+			int dec = stoi(action[2]);
 			Mat& img = getImage(image_name);
 
 			img = brightness(img, dec);
@@ -148,10 +168,10 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-		else if(action_id == "invert") { // ex: invert img1
+		else if(command_id == "invert") { // ex: invert img1
             checkLength(action, 2);
 
-			string image_name = action.at(1);
+			string image_name = action[1];
 			Mat& img = getImage(image_name);
 
 			img = invert(img);
@@ -159,7 +179,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-		else if(action_id == "contrast") { // ex: contrast img1 40
+		else if(command_id == "contrast") { // ex: contrast img1 40
             checkLength(action, 3);
 
 			string image_name = action.at(1);
@@ -171,7 +191,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-		else if(action_id == "saturate") { // ex: saturate img1 40
+		else if(command_id == "saturate") { // ex: saturate img1 40
 			checkLength(action, 3);
 
 			string image_name = action.at(1);
@@ -183,7 +203,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
 		}
-		else if(action_id == "horizontal_flip") { // ex: horizontal_flip img1
+		else if(command_id == "horizontal_flip") { // ex: horizontal_flip img1
 			checkLength(action, 2);
 
 			string image_name = action.at(1);
@@ -193,7 +213,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
 		}
-		else if(action_id == "vertical_flip") { // ex: vertical_flip img1
+		else if(command_id == "vertical_flip") { // ex: vertical_flip img1
 			checkLength(action, 2);
 
 			string image_name = action.at(1);
@@ -204,7 +224,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
 		}
-		else if(action_id == "rotate_90") { // ex: rotate_90 img1
+		else if(command_id == "rotate_90") { // ex: rotate_90 img1
 			checkLength(action, 2);
 
 			string image_name = action.at(1);
@@ -215,7 +235,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
 		}
-        else if(action_id == "crop") { // ex: crop img1 100 100 100 100
+        else if(command_id == "crop") { // ex: crop img1 100 100 100 100
             checkLength(action, 6);
 
             string image_name = action[1];
@@ -244,7 +264,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-        else if(action_id == "translate") { // ex: translate img1 40 40
+        else if(command_id == "translate") { // ex: translate img1 40 40
             checkLength(action, 4);
             
             string image_name = action[1];
@@ -258,7 +278,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-        else if(action_id == "resize") { // ex: resize img1 100 100
+        else if(command_id == "resize") { // ex: resize img1 100 100
             checkLength(action, 4);
 
             string image_name = action[1];
@@ -272,7 +292,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-        else if(action_id == "add") { // ex: add img1 img2
+        else if(command_id == "add") { // ex: add img1 img2
             checkLength(action, 3);
 
             string image_name1 = action[1];
@@ -285,7 +305,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
-        else if(action_id == "product") { // ex: product img1 img2
+        else if(command_id == "product") { // ex: product img1 img2
             checkLength(action, 3);
 
             string image_name1 = action[1];
@@ -298,7 +318,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
-        else if(action_id == "diff") { // ex: diff img1 img2
+        else if(command_id == "diff") { // ex: diff img1 img2
             checkLength(action, 3);
 
             string image_name1 = action[1];
@@ -311,7 +331,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
-        else if(action_id == "blur") { // ex: blur img1 5
+        else if(command_id == "blur") { // ex: blur img1 5
             checkLength(action, 3);
 
             string image_name = action[1];
@@ -323,7 +343,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-        else if(action_id == "erode") { // ex: erode img1 5
+        else if(command_id == "erode") { // ex: erode img1 5
             checkLength(action, 3);
 
             string image_name = action[1];
@@ -335,7 +355,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-        else if(action_id == "dilate") { // ex: dilate img1 5
+        else if(command_id == "dilate") { // ex: dilate img1 5
             checkLength(action, 3);
 
             string image_name = action[1];
@@ -347,7 +367,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-        else if(action_id == "binary_merge") { // ex: binary_merge img1 img2 mask
+        else if(command_id == "binary_merge") { // ex: binary_merge img1 img2 mask
             checkLength(action, 4);
 
             string image_name1 = action[1];
@@ -362,7 +382,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
-        else if(action_id == "weighted_merge") { // ex: weighted_merge img1 img2 mask
+        else if(command_id == "weighted_merge") { // ex: weighted_merge img1 img2 mask
             checkLength(action, 4);
 
             string image_name1 = action[1];
@@ -377,7 +397,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
-        else if(action_id == "screen") { // ex: screen img1 img2
+        else if(command_id == "screen") { // ex: screen img1 img2
             checkLength(action, 3);
 
             string image_name1 = action[1];
@@ -390,7 +410,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
-        else if(action_id == "overlay") { // ex: overlay img1 img2
+        else if(command_id == "overlay") { // ex: overlay img1 img2
             checkLength(action, 3);
 
             string image_name1 = action[1];

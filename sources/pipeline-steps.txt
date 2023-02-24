@@ -8,4 +8,28 @@ load_mask images/mask.png as mask1
 load_mask images/mask2.png as mask2
 
 
-overlay img1 img2
+brightness img1 40
+save img1 as images/result1.png
+brightness img2 -100
+invert img2
+reset img2
+contrast img1 100
+saturate img1 -100
+horizontal_flip img1
+vertical_flip img2
+rotate_90 img1
+//crop img4 50 300 350 650
+invert img2
+add img1 img2
+//diff img4 img3
+product img4 img3
+translate img2 100 50
+resize img3 200 200
+//blur img2 5
+//erode img2 5
+dilate img2 5
+contrast mask1 40
+binary_merge img3 img2 mask1
+weighted_merge img2_1 img1_1 mask2
+//contrast mask2 40
+save img2 as images/result2.png
