@@ -1,5 +1,6 @@
 load antoine-griezmann.png as img1
 load cat-cry.jpg as img2
+
 load C:\Users\marcb\Pictures\F1_Mercedes_2021_AMD_wallpaper.png as img3
 brightness img1 40
 invert img3

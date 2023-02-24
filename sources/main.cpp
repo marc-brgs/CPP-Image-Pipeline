@@ -68,18 +68,21 @@ int main(int argc, char** argv) {
 
     SetConsoleTextAttribute(hConsole, 8);
     while(getline(file, line)) {
-		vector<string> words_comp;
-		string delimiter = " ";
+        cout << line << endl;
 
+        if(line == "") continue; // skip line jumps
+        if(line.substr(0, 2) == "//") continue; // skip commented step
+
+        vector<string> words_comp;
+		string delimiter = " ";
 		size_t pos = 0;
 		string token;
-        cout << line << endl;
-		while((pos = line.find(delimiter)) != string::npos) {
+		while((pos = line.find(delimiter)) != string::npos) { // split line into words_comp
 			token = line.substr(0, pos);
 			words_comp.push_back(token);
 			line.erase(0, pos + delimiter.length());
 		}
-        words_comp.push_back(line); // last token of the line
+        words_comp.push_back(line); // do not forget last token of the line
 
 		if(words_comp.at(0) == "load") load_count++;
 
