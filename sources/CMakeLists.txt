@@ -3,6 +3,6 @@ project(image_pipeline_app)
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE-DIRECTORIES})
-add_executable(image_pipeline_app main.cpp)
+add_executable(image_pipeline_app main.cpp operations.cpp operations.h)
 
 target_link_libraries(image_pipeline_app ${OpenCV_LIBS})

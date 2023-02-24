@@ -1,10 +1,11 @@
-load antoine-griezmann.png as img1
-load cat-cry.jpg as img2
+load images/antoine-griezmann.png as img1
+load images/cat-cry.jpg as img2
+load images/harry-potter-akimbo.png as img3
+load images/uganda-army.png as img4
 
-load C:\Users\marcb\Pictures\F1_Mercedes_2021_AMD_wallpaper.png as img3
 brightness img1 40
 invert img3
-save img1 as result.png
+save img1 as images/result1.png
 brightness img2 -100
 invert img2
 contrast img1 100
@@ -12,4 +13,5 @@ saturate img1 -100
 horizontal_flip img1
 vertical_flip img2
 rotate_90 img1
-save img2 as result.png
+crop img4 50 300 350 650
+save img2 as images/result2.png
