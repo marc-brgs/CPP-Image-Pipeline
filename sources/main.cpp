@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
             }
 
             img = imread(it->second, IMREAD_COLOR);
-            
+
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }

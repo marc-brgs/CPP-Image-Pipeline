@@ -4,9 +4,9 @@
  * Cap given value between 0 and 255
  */
 uchar vcap(int value) {
-    //if(value > 255) return 255;
-    //if(value < 0) return 0;
-    //return value;
+    /*if(value > 255) return 255;
+    if(value < 0) return 0;
+    return value; */
 	return saturate_cast<uchar>(value);
 }
 
@@ -99,7 +99,7 @@ Mat contrast(Mat img, int dec) {
 }
 
 /**
- * Saturate (conversion to HSV make it inaccurate)
+ * Saturate OK
  */
 Mat saturate(Mat img, int dec) {
     img = convertToBGR(img);
