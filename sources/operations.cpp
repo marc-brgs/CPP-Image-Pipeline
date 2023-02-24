@@ -181,14 +181,19 @@ Mat crop(Mat img, int top, int left, int bottom, int right) {
 }
 
 /**
- * OK (image become usable by other operations after using translate)
+ * OK
  */
 Mat translate(Mat img, int *dec) {
 	Mat imgCopy = img.clone();
 
+    // handle negative values
+    if(dec[0] < 0) dec[0] = img.cols - abs(dec[0]);
+    if(dec[1] < 0) dec[1] = img.rows - abs(dec[1]);
+
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
-			imgCopy.at<Vec3b>(Point((x-dec[0])%img.cols, (y-dec[1])%img.rows)) = img.at<Vec3b>(y,x);
+			imgCopy.at<Vec3b>(Point((x+dec[0])%img.cols, (y+dec[1])%img.rows)) = img.at<Vec3b>(y,x);
+            //imgCopy.at<Vec3b>(Point(x,y)) = img.at<Vec3b>((y-dec[1])%img.rows, (x-dec[0])%img.cols);
         }
     }
 
