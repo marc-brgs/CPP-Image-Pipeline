@@ -32,7 +32,8 @@ Mat product(Mat img1, Mat img2);
 
 uchar vcap(int value);
 void checkLength(vector<string> action, int size);
-Mat getImage(string name);
+Mat& getImage(string name);
+void showImage(string title, Mat img);
 
 
 // Global variables declaration
@@ -139,101 +140,79 @@ int main(int argc, char** argv) {
 
 			string image_name = action.at(1);
 			int dec = stoi(action.at(2));
-			Mat img = getImage(image_name);
+			Mat& img = getImage(image_name);
 
 			img = brightness(img, dec);
 
-            stringstream sstm3;
-            sstm3 << "Step " << (i+1) << "/" << lines_count << " - " << action.at(1);
-            imshow(sstm3.str(), img);
-            waitKey(0);
-            destroyAllWindows();
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
         }
 		else if(action_id == "invert") { // ex: invert img1
             checkLength(action, 2);
 
 			string image_name = action.at(1);
-			Mat img = getImage(image_name);
+			Mat& img = getImage(image_name);
 
 			img = invert(img);
 
-            stringstream sstm3;
-            sstm3 << "Step " << (i+1) << "/" << lines_count << " - " << action.at(1);
-            imshow(sstm3.str(), img);
-            waitKey(0);
-            destroyAllWindows();
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
         }
 		else if(action_id == "contrast") { // ex: contrast img1 40
             checkLength(action, 3);
 
 			string image_name = action.at(1);
 			int dec = stoi(action.at(2));
-			Mat img = getImage(image_name);
+			Mat& img = getImage(image_name);
 
 			img = contrast(img, dec);
 
-            stringstream sstm3;
-            sstm3 << "Step " << (i+1) << "/" << lines_count << " - " << action.at(1);
-            imshow(sstm3.str(), img);
-            waitKey(0);
-            destroyAllWindows();
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
         }
 		else if(action_id == "saturate") { // ex: saturate img1 40
 			checkLength(action, 3);
 
 			string image_name = action.at(1);
 			int dec = stoi(action.at(2));
-			Mat img = getImage(image_name);
 
+			Mat& img = getImage(image_name);
 			img = saturate(img, dec);
 
-            stringstream sstm3;
-            sstm3 << "Step " << (i+1) << "/" << lines_count << " - " << action.at(1);
-            imshow(sstm3.str(), img);
-            waitKey(0);
-            destroyAllWindows();
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
 		}
 		else if(action_id == "horizontal_flip") { // ex: horizontal_flip img1
 			checkLength(action, 2);
 
 			string image_name = action.at(1);
-			Mat img = getImage(image_name);
-
+			Mat& img = getImage(image_name);
 			img = horizontalFlip(img);
 
-            stringstream sstm3;
-            sstm3 << "Step " << (i+1) << "/" << lines_count << " - " << action.at(1);
-            imshow(sstm3.str(), img);
-            waitKey(0);
-            destroyAllWindows();
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
 		}
 		else if(action_id == "vertical_flip") { // ex: vertical_flip img1
 			checkLength(action, 2);
 
 			string image_name = action.at(1);
-			Mat img = getImage(image_name);
 
+			Mat& img = getImage(image_name);
 			img = verticalFlip(img);
 
-            stringstream sstm3;
-            sstm3 << "Step " << (i+1) << "/" << lines_count << " - " << action.at(1);
-            imshow(sstm3.str(), img);
-            waitKey(0);
-            destroyAllWindows();
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
 		}
 		else if(action_id == "rotate_90") { // ex: rotate_90 img1
 			checkLength(action, 2);
 
 			string image_name = action.at(1);
-			Mat img = getImage(image_name);
 
+			Mat& img = getImage(image_name);
 			img = rotate90(img);
-
-            stringstream sstm3;
-            sstm3 << "Step " << (i+1) << "/" << lines_count << " - " << action.at(1);
-            imshow(sstm3.str(), img);
-            waitKey(0);
-            destroyAllWindows();
+            
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + action.at(1);
+            showImage(title, img);
 		}
         else {
             printSubLineError("[!] Error : Unknown action in pipeline-steps.txt");
@@ -269,15 +248,25 @@ void checkLength(vector<string> action, int size) {
  * Return image object corresponding to variable name declared in steps file
  * Throw an error and end program if name unknown to program
  */
-Mat getImage(string name) {
+Mat& getImage(string name) {
 	auto it = stored_images.find(name);
-
+    
 	if (it == stored_images.end()) {
 		printSubLineError("[!] Error : Image name "+ name +" not declared");
 		exit(0);
 	}
 
 	return it->second;
+}
+
+/**
+ * Show image in a new window and wait user click to resume code execution
+ */
+void showImage(string title, Mat img) {
+    namedWindow(title, CV_WINDOW_OPENGL); // fit to the screen if too big
+    imshow(title, img);
+    waitKey(0);
+    destroyAllWindows();
 }
 
 void printHeader() {
