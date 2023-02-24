@@ -34,5 +34,7 @@ Mat overlay(Mat img1, Mat img2);
 Mat blur(Mat img, int radius);
 Mat erode(Mat img, int radius);
 Mat dilate(Mat img, int radius);
+Mat rotate(Mat img, int angle, int *center);
+Mat threshold(Mat img, int t);
 
 #endif

@@ -166,7 +166,7 @@ Mat rotate90(Mat img) {
 }
 
 /**
- * OK
+ * Crop OK
  */
 Mat crop(Mat img, int top, int left, int bottom, int right) {
 	Mat imgCrop(bottom-top, right-left, CV_8UC3, Scalar(255, 255, 255));
@@ -181,7 +181,7 @@ Mat crop(Mat img, int top, int left, int bottom, int right) {
 }
 
 /**
- * OK
+ * Translate OK
  */
 Mat translate(Mat img, int *dec) {
 	Mat imgCopy = img.clone();
@@ -201,7 +201,7 @@ Mat translate(Mat img, int *dec) {
 }
 
 /**
- * OK
+ * Resize OK
  */
 Mat resize(Mat img, int *dims) {
     Mat newImg(dims[1], dims[0], CV_8UC3, Scalar(255, 255, 255));
@@ -216,7 +216,7 @@ Mat resize(Mat img, int *dims) {
 }
 
 /**
- * OK
+ * Normalize OK
  */
 Mat* normalize(Mat *images, int images_count) {
 	int minW = 100000, maxW = 0, minH = 100000, maxH = 0;
@@ -239,7 +239,7 @@ Mat* normalize(Mat *images, int images_count) {
 }
 
 /**
- * OK
+ * Add OK
  */
 Mat add(Mat img1, Mat img2) {
     Mat *images = new Mat[2];
@@ -267,7 +267,7 @@ Mat add(Mat img1, Mat img2) {
 }
 
 /**
- * OK
+ * Product OK
  */
 Mat product(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
@@ -295,7 +295,7 @@ Mat product(Mat img1, Mat img2) {
 }
 
 /**
- * OK
+ * Difference OK
  */
 Mat diff(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
@@ -323,7 +323,7 @@ Mat diff(Mat img1, Mat img2) {
 }
 
 /**
- * OK
+ * Binary merge OK
  */
 Mat binaryMerge(Mat img1, Mat img2, Mat mask) {
 	Mat *images = new Mat[2];
@@ -364,7 +364,7 @@ Mat binaryMerge(Mat img1, Mat img2, Mat mask) {
 }
 
 /**
- * OK
+ * Weighted merge OK
  */
 Mat weightedMerge(Mat img1, Mat img2, Mat mask) {
 	Mat *images = new Mat[2];
@@ -398,7 +398,7 @@ Mat weightedMerge(Mat img1, Mat img2, Mat mask) {
 }
 
 /**
- * OK
+ * Screen OK
  */
 Mat screen(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
@@ -426,7 +426,7 @@ Mat screen(Mat img1, Mat img2) {
 }
 
 /**
- * OK
+ * Overlay OK
  */
 Mat overlay(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
@@ -455,7 +455,7 @@ Mat overlay(Mat img1, Mat img2) {
 }
 
 /**
- * OK
+ * Blur OK
  */
 Mat blur(Mat img, int radius) {
     img = convertToBGR(img);
@@ -487,7 +487,7 @@ Mat blur(Mat img, int radius) {
 }
 
 /**
- * OK
+ * Erode OK
  */
 Mat erode(Mat img, int radius) {
     img = convertToBGR(img);
@@ -513,7 +513,7 @@ Mat erode(Mat img, int radius) {
 }
 
 /**
- * OK
+ * Dilate OK
  */
 Mat dilate(Mat img, int radius) {
     img = convertToBGR(img);
@@ -538,6 +538,9 @@ Mat dilate(Mat img, int radius) {
 	return imgCopy;
 }
 
+/**
+ * Generic rotate OK
+ */
 Mat rotate(Mat img, int angle, int *center) {
     img = convertToBGR(img);
 	Mat imgCopy = img.clone();
@@ -559,4 +562,26 @@ Mat rotate(Mat img, int angle, int *center) {
 	}
 
 	return imgCopy;
+}
+
+/**
+ * Threshold OK
+ */
+Mat threshold(Mat img, int t) {
+    img = convertToBGR(img);
+    t = vcap(t);
+
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+            Vec3b & color = img.at<Vec3b>(y,x); // get pixel
+			int avg = (color[0] + color[1] + color[2])/3;
+			if(avg > t) {
+                img.at<Vec3b>(Point(x,y)) = Vec3b(255, 255, 255); // set pixel to white
+			}
+			else {
+				img.at<Vec3b>(Point(x,y)) = Vec3b(0, 0, 0); // set pixel to black
+			}
+        }
+    }
+	return img;
 }

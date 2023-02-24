@@ -41,3 +41,6 @@ reset img2
 binary_merge img3 img2 mask1
 brightness mask2 80
 weighted_merge img2 img1 mask2
+resize img2 200 200
+rotate img2 45 100 100
+threshold img2 180

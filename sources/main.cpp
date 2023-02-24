@@ -19,6 +19,7 @@ void printHeader();
 void printLine(string text);
 void printSubLine(string text);
 void printSubLineError(string text);
+void printSubLineDone(string text);
 
 void checkLength(vector<string> action, int size);
 Mat& getImage(string name);
@@ -31,13 +32,6 @@ map<string, Mat> stored_images;
 map<string, string> images_path;
 
 int main(int argc, char** argv) {
-
-    // Colors test
-    /*for(int k = 0; k < 255; k++) {
-        SetConsoleTextAttribute(hConsole, k); // Set console color
-        cout << k << " test" << endl;
-    }*/
-
     // Program init and locate steps file
     printHeader();
 
@@ -104,7 +98,7 @@ int main(int argc, char** argv) {
 
             string path = action.at(1);
             string image_name = action.at(3);
-            printSubLine("Loading " + path);
+            printSubLineDone("Loading " + path);
 
             Mat img = imread(path, IMREAD_COLOR);
             if(img.empty()) {
@@ -119,7 +113,7 @@ int main(int argc, char** argv) {
 
             string path = action[1];
             string image_name = action[3];
-            printSubLine("Loading mask " + path);
+            printSubLineDone("Loading mask " + path);
 
             Mat img = imread(path, IMREAD_GRAYSCALE);
             if(img.empty()) {
@@ -135,7 +129,7 @@ int main(int argc, char** argv) {
             string file_name = action.at(3);
             Mat& img = getImage(image_name);
 
-            printSubLine("Saving "+ image_name +" as "+ file_name);
+            printSubLineDone("Saving "+ image_name +" as "+ file_name);
             imwrite(file_name, img);
         }
         else if (command_id == "reset") { // ex: reset img1
@@ -423,6 +417,33 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
+        else if(command_id == "rotate") { // rotate img1 45 0 0
+            checkLength(action, 5);
+
+            string image_name = action[1];
+            int angle = stoi(action[2]);
+            int *center = new int[2];
+            center[0] = stoi(action[3]);
+            center[1] = stoi(action[4]);
+
+            Mat& img = getImage(image_name);
+            img = rotate(img, angle, center);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
+        else if(command_id == "threshold") { // ex: threshold img1 100
+            checkLength(action, 3);
+
+			string image_name = action[1];
+			int t = stoi(action[2]);
+			Mat& img = getImage(image_name);
+
+			img = threshold(img, t);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
         else {
             printSubLineError("[!] Error : Unknown action in pipeline-steps.txt");
 			return 0;
@@ -501,6 +522,14 @@ void printSubLine(string text) {
 void printSubLineError(string text) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, 12); // Set to light red
+    cout << " \\ ";
+    cout << text << endl;
+    SetConsoleTextAttribute(hConsole, 15); // Set to white
+}
+
+void printSubLineDone(string text) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, 10); // Set to light green
     cout << " \\ ";
     cout << text << endl;
     SetConsoleTextAttribute(hConsole, 15); // Set to white
