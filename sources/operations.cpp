@@ -190,10 +190,11 @@ Mat rotate90(Mat img) {
 /**
  * Generic rotate OK
  */
-Mat rotate(Mat img, int angle, int *center) {
+Mat rotate(Mat img, float angle, int *center) {
     img = convertToBGR(img);
 	Mat imgCopy = img.clone();
 
+    angle = angle * 3.1415926/180; // convert to radians
 	float ct = cos(-angle);
 	float st = sin(-angle);
 	for(int y = 0; y < img.rows; y++) {

@@ -21,7 +21,7 @@ Mat invert(Mat img);
 Mat horizontalFlip(Mat img);
 Mat verticalFlip(Mat img);
 Mat rotate90(Mat img);
-Mat rotate(Mat img, int angle, int *center);
+Mat rotate(Mat img, float angle, int *center);
 Mat crop(Mat img, int top, int left, int bottom, int right);
 Mat translate(Mat img, int *dec);
 Mat resize(Mat img, int *dims);
