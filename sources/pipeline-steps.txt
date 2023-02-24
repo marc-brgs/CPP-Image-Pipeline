@@ -8,6 +8,4 @@ load_mask images/mask.png as mask1
 load_mask images/mask2.png as mask2
 
 
-translate img1 40 40
-resize img1 200 200
-brightness img1 40
+overlay img1 img2

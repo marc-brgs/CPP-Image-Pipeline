@@ -377,10 +377,37 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
+        else if(action_id == "screen") { // ex: screen img1 img2
+            checkLength(action, 3);
+
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            img1 = screen(img1, img2);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
+        }
+        else if(action_id == "overlay") { // ex: overlay img1 img2
+            checkLength(action, 3);
+
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            img1 = overlay(img1, img2);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
+        }
         else {
             printSubLineError("[!] Error : Unknown action in pipeline-steps.txt");
 			return 0;
         }
+
 	}
 
     printLine("Program end");

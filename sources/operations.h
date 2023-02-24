@@ -30,6 +30,7 @@ Mat diff(Mat img1, Mat img2);
 Mat binaryMerge(Mat img1, Mat img2, Mat mask);
 Mat weightedMerge(Mat img1, Mat img2, Mat mask);
 Mat screen(Mat img1, Mat img2);
+Mat overlay(Mat img1, Mat img2);
 Mat blur(Mat img, int radius);
 Mat erode(Mat img, int radius);
 Mat dilate(Mat img, int radius);

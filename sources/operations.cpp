@@ -277,16 +277,16 @@ Mat product(Mat img1, Mat img2) {
 
 	Mat a = images[0], b = images[1];
 	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
-
+    
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
 			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
 			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
 
 			Vec3b & color = img.at<Vec3b>(y,x);
-			color[0] = vcap(a_color[0] * b_color[0] / 255);
-			color[1] = vcap(a_color[1] * b_color[1] / 255);
-			color[2] = vcap(a_color[2] * b_color[2] / 255);
+			color[0] = vcap(a_color[0] * static_cast<float>(b_color[0]) / 255);
+			color[1] = vcap(a_color[1] * static_cast<float>(b_color[1]) / 255);
+			color[2] = vcap(a_color[2] * static_cast<float>(b_color[2]) / 255);
 			img.at<Vec3b>(Point(x,y)) = color; // set pixel
         }
     }
@@ -398,7 +398,7 @@ Mat weightedMerge(Mat img1, Mat img2, Mat mask) {
 }
 
 /**
- * Untested
+ * OK
  */
 Mat screen(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
@@ -426,36 +426,33 @@ Mat screen(Mat img1, Mat img2) {
 }
 
 /**
- * ERROR at build
+ * OK
  */
-/*Mat overlay(Mat img1, Mat img2) {
+Mat overlay(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
     images[0] = convertToBGR(img1);
     images[1] = convertToBGR(img2);
 	images = normalize(images, 2);
+
 	Mat a = images[0], b = images[1];
 	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
-	Mat screen = screen(a, b);
+	Mat img_screen = screen(a, b);
+    Mat img_product = product(a, b);
+
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
-			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
-			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
-			Vec3b & screen_color = b.at<Vec3b>(y,x); // get pixel
-			Vec3b & color = img.at<Vec3b>(y,x);
+            Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
 			int avg = (a_color[0] + a_color[1] + a_color[2])/3;
 			if(avg < 128) { // product
-				color[0] = static_cast<int>(a_color[0] * b_color[0] /255);
-				color[1] = static_cast<int>(a_color[0] * b_color[0] /255);
-				color[2] = static_cast<int>(a_color[0] * b_color[0] /255);
-				img.at<Vec3b>(Point(x,y)) = color; // set pixel
+                img.at<Vec3b>(Point(x,y)) = img_product.at<Vec3b>(y,x); // set pixel
 			}
 			else { // screen
-				img.at<Vec3b>(Point(x,y)) = screen_color; // set pixel
+				img.at<Vec3b>(Point(x,y)) = img_screen.at<Vec3b>(y,x); // set pixel
 			}
         }
     }
 	return img;
-}*/
+}
 
 /**
  * OK
