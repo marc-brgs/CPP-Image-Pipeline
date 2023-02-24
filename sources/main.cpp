@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 		}
         words_comp.push_back(line); // do not forget last token of the line
 
-		if(words_comp.at(0) == "load") load_count++;
+		if(words_comp.at(0) == "load" || words_comp.at(0) == "load_mask") load_count++;
 
 		lines_comp.push_back(words_comp);
     }
@@ -112,7 +112,21 @@ int main(int argc, char** argv) {
             }
             stored_images.insert({image_name, img});
         }
-        else if (action_id == "save") { // ex: save img1 as result.png
+        else if(action_id == "load_mask") { // ex: load_mask mask.png as mask1
+            checkLength(action, 4);
+
+            string path = action.at(1);
+            string image_name = action.at(3);
+            printSubLine("Loading mask " + path);
+
+            Mat img = imread(path, IMREAD_GRAYSCALE);
+            if(img.empty()) {
+                printSubLineError("[!] Error : Could not read the image");
+                return 0;
+            }
+            stored_images.insert({image_name, img});
+        }
+        else if(action_id == "save") { // ex: save img1 as result.png
             checkLength(action, 4);
 
             string image_name = action.at(1);
@@ -333,6 +347,36 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
+        else if(action_id == "binary_merge") { // ex: binary_merge img1 img2 mask
+            checkLength(action, 4);
+
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+            string mask_name = action[3];
+
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            Mat& mask = getImage(mask_name);
+            img1 = binaryMerge(img1, img2, mask);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
+        }
+        else if(action_id == "weighted_merge") { // ex: weighted_merge img1 img2 mask
+            checkLength(action, 4);
+
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+            string mask_name = action[3];
+
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            Mat& mask = getImage(mask_name);
+            img1 = weightedMerge(img1, img2, mask);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
+        }
         else {
             printSubLineError("[!] Error : Unknown action in pipeline-steps.txt");
 			return 0;
@@ -373,7 +417,7 @@ Mat& getImage(string name) {
  * Show image in a new window and wait user click to resume code execution
  */
 void showImage(string title, Mat img) {
-    //namedWindow(title, CV_WINDOW_OPENGL); // fit to the screen if too big
+    namedWindow(title, CV_WINDOW_AUTOSIZE); // fit to the screen if too big
     imshow(title, img);
     waitKey(0);
     destroyAllWindows();

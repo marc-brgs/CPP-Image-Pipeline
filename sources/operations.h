@@ -10,6 +10,8 @@ using namespace std;
 using namespace cv;
 
 uchar vcap(int value);
+Mat convertToBGR(Mat img);
+Mat convertToGS(Mat img);
 
 Mat brightness(Mat img, int dec);
 Mat invert(Mat img);

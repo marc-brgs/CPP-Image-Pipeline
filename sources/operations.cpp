@@ -10,10 +10,26 @@ uchar vcap(int value) {
 	return saturate_cast<uchar>(value);
 }
 
+Mat convertToBGR(Mat img) {
+    if (img.type()==CV_8UC1) { // if input image is grayscale
+        cvtColor(img, img, CV_GRAY2BGR);
+    }
+    return img;
+}
+
+Mat convertToGS(Mat img) {
+    if (img.type()!=CV_8UC1) { // mask is not grayscale
+        cvtColor(img, img, CV_BGR2GRAY);
+    }
+    return img;
+}
+
 /**
  * Brightness OK
  */
 Mat brightness(Mat img, int dec) {
+    img = convertToBGR(img);
+
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
 			Vec3b & color = img.at<Vec3b>(y,x); // get pixel
@@ -31,6 +47,8 @@ Mat brightness(Mat img, int dec) {
  * Invert OK
  */
 Mat invert(Mat img) {
+    img = convertToBGR(img);
+
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
 			Vec3b & color = img.at<Vec3b>(y,x); // get pixel
@@ -48,6 +66,7 @@ Mat invert(Mat img) {
  * Contrast OK
  */
 Mat contrast(Mat img, int dec) {
+    img = convertToBGR(img);
 	Mat imgHsv;
 	cvtColor(img, imgHsv, CV_BGR2HSV);
 
@@ -83,6 +102,7 @@ Mat contrast(Mat img, int dec) {
  * Saturate (conversion to HSV make it inaccurate)
  */
 Mat saturate(Mat img, int dec) {
+    img = convertToBGR(img);
 	Mat imgHsv;
 	cvtColor(img, imgHsv, CV_BGR2HSV);
 
@@ -218,8 +238,8 @@ Mat* normalize(Mat *images, int images_count) {
  */
 Mat add(Mat img1, Mat img2) {
     Mat *images = new Mat[2];
-    images[0] = img1;
-    images[1] = img2;
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
 	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
@@ -246,8 +266,8 @@ Mat add(Mat img1, Mat img2) {
  */
 Mat product(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
-    images[0] = img1;
-    images[1] = img2;
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
 	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
@@ -274,8 +294,8 @@ Mat product(Mat img1, Mat img2) {
  */
 Mat diff(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
-    images[0] = img1;
-    images[1] = img2;
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
 	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
@@ -298,16 +318,22 @@ Mat diff(Mat img1, Mat img2) {
 }
 
 /**
- * Untested
+ * OK
  */
 Mat binaryMerge(Mat img1, Mat img2, Mat mask) {
 	Mat *images = new Mat[2];
-    images[0] = img1;
-    images[1] = img2;
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
 	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
 	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
+
+    mask = convertToGS(mask);
+    int *dims = new int[2];
+    dims[0] = img.rows;
+    dims[1] = img.cols;
+    mask = resize(mask, dims);
 
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
@@ -333,27 +359,32 @@ Mat binaryMerge(Mat img1, Mat img2, Mat mask) {
 }
 
 /**
- * Untested
+ * OK
  */
 Mat weightedMerge(Mat img1, Mat img2, Mat mask) {
 	Mat *images = new Mat[2];
-    images[0] = img1;
-    images[1] = img2;
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
 	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
 	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
 
+    mask = convertToGS(mask);
+    int *dims = new int[2];
+    dims[0] = img.rows;
+    dims[1] = img.cols;
+    mask = resize(mask, dims);
+    
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
 			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
 			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
 
 			Vec3b & color = img.at<Vec3b>(y,x);
-
-			color[0] = vcap(a_color[0] * (mask.at<uchar>(y,x)/255) + b_color[0] * (1-mask.at<uchar>(y,x)/255));
-			color[1] = vcap(a_color[1] * (mask.at<uchar>(y,x)/255) + b_color[1] * (1-mask.at<uchar>(y,x)/255));
-			color[2] = vcap(a_color[2] * (mask.at<uchar>(y,x)/255) + b_color[2] * (1-mask.at<uchar>(y,x)/255));
+			color[0] = vcap(a_color[0] * (static_cast<float>(mask.at<uchar>(y,x))/255) + b_color[0] * static_cast<float>(1-(mask.at<uchar>(y,x)/255)));
+			color[1] = vcap(a_color[1] * (static_cast<float>(mask.at<uchar>(y,x))/255) + b_color[1] * static_cast<float>(1-(mask.at<uchar>(y,x)/255)));
+			color[2] = vcap(a_color[2] * (static_cast<float>(mask.at<uchar>(y,x))/255) + b_color[2] * static_cast<float>(1-(mask.at<uchar>(y,x)/255)));
 			img.at<Vec3b>(Point(x,y)) = color; // set pixel
         }
     }
@@ -366,8 +397,8 @@ Mat weightedMerge(Mat img1, Mat img2, Mat mask) {
  */
 Mat screen(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
-    images[0] = img1;
-    images[1] = img2;
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
 	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
@@ -394,8 +425,8 @@ Mat screen(Mat img1, Mat img2) {
  */
 /*Mat overlay(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
-    images[0] = img1;
-    images[1] = img2;
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
 	images = normalize(images, 2);
 	Mat a = images[0], b = images[1];
 	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
@@ -425,6 +456,7 @@ Mat screen(Mat img1, Mat img2) {
  * OK
  */
 Mat blur(Mat img, int radius) {
+    img = convertToBGR(img);
 	Mat imgCopy = img.clone();
 
 	for(int y = 0; y < img.rows; y++) {
@@ -456,6 +488,7 @@ Mat blur(Mat img, int radius) {
  * OK
  */
 Mat erode(Mat img, int radius) {
+    img = convertToBGR(img);
 	Mat imgCopy = img.clone();
 
 	for(int y = 0; y < img.rows; y++) {
@@ -481,6 +514,7 @@ Mat erode(Mat img, int radius) {
  * OK
  */
 Mat dilate(Mat img, int radius) {
+    img = convertToBGR(img);
 	Mat imgCopy = img.clone();
 
 	for(int y = 0; y < img.rows; y++) {
@@ -503,6 +537,7 @@ Mat dilate(Mat img, int radius) {
 }
 
 Mat rotate(Mat img, int angle, int *center) {
+    img = convertToBGR(img);
 	Mat imgCopy = img.clone();
 
 	float ct = cos(-angle);
