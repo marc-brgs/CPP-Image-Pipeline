@@ -161,7 +161,7 @@ Mat crop(Mat img, int top, int left, int bottom, int right) {
 }
 
 /**
- * OK
+ * OK (image become usable by other operations after using translate)
  */
 Mat translate(Mat img, int *dec) {
 	Mat imgCopy = img.clone();
@@ -176,7 +176,7 @@ Mat translate(Mat img, int *dec) {
 }
 
 /**
- * OK (program freeze when using after translate)
+ * OK
  */
 Mat resize(Mat img, int *dims) {
     Mat newImg(dims[1], dims[0], CV_8UC3, Scalar(255, 255, 255));
@@ -421,6 +421,9 @@ Mat screen(Mat img1, Mat img2) {
 	return img;
 }*/
 
+/**
+ * OK
+ */
 Mat blur(Mat img, int radius) {
 	Mat imgCopy = img.clone();
 
@@ -431,7 +434,7 @@ Mat blur(Mat img, int radius) {
 			for(int i = -radius; i < radius+1; i++) {
 				for(int j = -radius; j < radius+1; j++) {
 					if(x+i >= 0 && x+i < img.cols && y+j >= 0 && y+j < img.rows) {
-						Vec3b & color = img.at<Vec3b>(y,x);
+						Vec3b & color = img.at<Vec3b>(y+j,x+i);
 						for(int c = 0; c < 3; c++)
 							sum_values[c] += color[c];
 						num_values++;
@@ -449,6 +452,9 @@ Mat blur(Mat img, int radius) {
 	return imgCopy;
 }
 
+/**
+ * OK
+ */
 Mat erode(Mat img, int radius) {
 	Mat imgCopy = img.clone();
 
@@ -458,7 +464,7 @@ Mat erode(Mat img, int radius) {
 			for(int i = -radius; i < radius+1; i++) {
 				for(int j = -radius; j < radius+1; j++) {
 					if(x+i >= 0 && x+i < img.cols && y+j >= 0 && y+j < img.rows) {
-						Vec3b & color = img.at<Vec3b>(y,x);
+						Vec3b & color = img.at<Vec3b>(y+j,x+i);
 						for(int c = 0; c < 3; c++)
 							min_val[c] = min_val[c] < color[c] ? min_val[c] : color[c];
 					}
@@ -471,6 +477,9 @@ Mat erode(Mat img, int radius) {
 	return imgCopy;
 }
 
+/**
+ * OK
+ */
 Mat dilate(Mat img, int radius) {
 	Mat imgCopy = img.clone();
 
@@ -480,7 +489,7 @@ Mat dilate(Mat img, int radius) {
 			for(int i = -radius; i < radius+1; i++) {
 				for(int j = -radius; j < radius+1; j++) {
 					if(x+i >= 0 && x+i < img.cols && y+j >= 0 && y+j < img.rows) {
-						Vec3b & color = img.at<Vec3b>(y,x);
+						Vec3b & color = img.at<Vec3b>(y+j,x+i);
 						for(int c = 0; c < 3; c++)
 							max_val[c] = max_val[c] > color[c] ? max_val[c] : color[c];
 					}

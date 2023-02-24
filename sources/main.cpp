@@ -297,19 +297,46 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
+        else if(action_id == "blur") { // ex: blur img1 5
+            checkLength(action, 3);
+
+            string image_name = action[1];
+            int radius = stoi(action[2]);
+
+            Mat& img = getImage(image_name);
+            img = blur(img, radius);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
+        else if(action_id == "erode") { // ex: erode img1 5
+            checkLength(action, 3);
+
+            string image_name = action[1];
+            int radius = stoi(action[2]);
+
+            Mat& img = getImage(image_name);
+            img = erode(img, radius);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
+        else if(action_id == "dilate") { // ex: dilate img1 5
+            checkLength(action, 3);
+
+            string image_name = action[1];
+            int radius = stoi(action[2]);
+
+            Mat& img = getImage(image_name);
+            img = dilate(img, radius);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
         else {
             printSubLineError("[!] Error : Unknown action in pipeline-steps.txt");
 			return 0;
         }
-
-		// Display image (at each operation on image)
-		if(action_id == "load" || action_id == "save") continue;
-
-		/*stringstream sstm3;
-        sstm3 << "Step " << (i+1) << "/" << lines_count << " - " << action.at(1);
-		imshow(sstm3.str(), img);
-		waitKey(0);
-		destroyAllWindows();*/
 	}
 
     printLine("Program end");
