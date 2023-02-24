@@ -230,6 +230,34 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
+        else if(action_id == "translate") { // ex: translate img1 40 40
+            checkLength(action, 4);
+            
+            string image_name = action[1];
+            int *dec = new int[2];
+            dec[0] = stoi(action[2]);
+            dec[1] = stoi(action[3]);
+
+            Mat& img = getImage(image_name);
+            img = translate(img, dec);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
+        else if(action_id == "resize") { // ex: resize img1 100 100
+            checkLength(action, 4);
+
+            string image_name = action[1];
+            int *dims = new int[2];
+            dims[0] = stoi(action[2]);
+            dims[1] = stoi(action[3]);
+
+            Mat& img = getImage(image_name);
+            img = resize(img, dims);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
         else if(action_id == "add") { // ex: add img1 img2
             checkLength(action, 3);
 
@@ -256,7 +284,7 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
-        else if(action_id == "diff") { // ex: product img1 img2
+        else if(action_id == "diff") { // ex: diff img1 img2
             checkLength(action, 3);
 
             string image_name1 = action[1];

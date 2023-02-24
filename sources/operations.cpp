@@ -161,7 +161,7 @@ Mat crop(Mat img, int top, int left, int bottom, int right) {
 }
 
 /**
- * Untested
+ * OK
  */
 Mat translate(Mat img, int *dec) {
 	Mat imgCopy = img.clone();
@@ -176,18 +176,18 @@ Mat translate(Mat img, int *dec) {
 }
 
 /**
- * Untested
+ * OK (program freeze when using after translate)
  */
 Mat resize(Mat img, int *dims) {
-	Mat imgCopy = img.clone();
+    Mat newImg(dims[1], dims[0], CV_8UC3, Scalar(255, 255, 255));
 
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-			imgCopy.at<Vec3b>(Point(x,y)) = img.at<Vec3b>((y/dims[1])*img.rows,(x/dims[0])*img.cols);
+	for(int y = 0; y < dims[1]; y++) {
+		for(int x = 0; x < dims[0]; x++) {
+			newImg.at<Vec3b>(Point(x,y)) = img.at<Vec3b>(static_cast<int>((static_cast<float>(y)/dims[1])*img.rows), static_cast<int>((static_cast<float>(x)/dims[0])*img.cols));
         }
     }
 
-	return imgCopy;
+    return newImg;
 }
 
 /**
@@ -202,7 +202,7 @@ Mat* normalize(Mat *images, int images_count) {
 		if(images[i].rows < minH) minH = images[i].rows;
 		if(images[i].rows > maxH) maxH = images[i].rows;
 	}
-    cout << minW << " " << minH;
+    
 	if(minW == maxW && minH == maxH) {
 		return images;
 	}
