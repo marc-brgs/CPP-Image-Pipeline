@@ -269,5 +269,7 @@ weighted_merge img2 img1 mask2
 resize img2 200 200
 rotate img2 45 100 100
 threshold img2 180
-
 ```
+
+*Note 1 : // can be used to comments lines but they should be place at the 2 first characters of the line*  
+*Note 2 : Line jumps are allowed*
