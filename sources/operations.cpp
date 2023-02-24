@@ -44,25 +44,6 @@ Mat brightness(Mat img, int dec) {
 }
 
 /**
- * Invert OK
- */
-Mat invert(Mat img) {
-    img = convertToBGR(img);
-
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-			Vec3b & color = img.at<Vec3b>(y,x); // get pixel
-			color[0] = 255 - color[0];
-			color[1] = 255 - color[1];
-			color[2] = 255 - color[2];
-			img.at<Vec3b>(Point(x,y)) = color; // set pixel
-        }
-    }
-
-	return img;
-}
-
-/**
  * Contrast OK
  */
 Mat contrast(Mat img, int dec) {
@@ -121,6 +102,47 @@ Mat saturate(Mat img, int dec) {
 }
 
 /**
+ * Threshold OK
+ */
+Mat threshold(Mat img, int t) {
+    img = convertToBGR(img);
+    t = vcap(t);
+
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+            Vec3b & color = img.at<Vec3b>(y,x); // get pixel
+			int avg = (color[0] + color[1] + color[2])/3;
+			if(avg > t) {
+                img.at<Vec3b>(Point(x,y)) = Vec3b(255, 255, 255); // set pixel to white
+			}
+			else {
+				img.at<Vec3b>(Point(x,y)) = Vec3b(0, 0, 0); // set pixel to black
+			}
+        }
+    }
+	return img;
+}
+
+/**
+ * Invert OK
+ */
+Mat invert(Mat img) {
+    img = convertToBGR(img);
+
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+			Vec3b & color = img.at<Vec3b>(y,x); // get pixel
+			color[0] = 255 - color[0];
+			color[1] = 255 - color[1];
+			color[2] = 255 - color[2];
+			img.at<Vec3b>(Point(x,y)) = color; // set pixel
+        }
+    }
+
+	return img;
+}
+
+/**
  * Horizontal flip OK
  */
 Mat horizontalFlip(Mat img) {
@@ -159,6 +181,32 @@ Mat rotate90(Mat img) {
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
             imgCopy.at<Vec3b>(Point(img.rows-y-1, x)) = img.at<Vec3b>(y,x); // set pixel
+		}
+	}
+
+	return imgCopy;
+}
+
+/**
+ * Generic rotate OK
+ */
+Mat rotate(Mat img, int angle, int *center) {
+    img = convertToBGR(img);
+	Mat imgCopy = img.clone();
+
+	float ct = cos(-angle);
+	float st = sin(-angle);
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+			int a = center[0]+static_cast<int>(ct*(x-center[0])-st*(y-center[1]));
+			int b = center[0]+static_cast<int>(st*(x-center[0])+ct*(y-center[1]));
+			if(a >= 0 && a < img.cols && b >= 0 && b < img.rows) {
+				imgCopy.at<Vec3b>(Point(x,y)) = img.at<Vec3b>(b,a); // set pixel
+			}
+			else {
+				Vec3b zero(0, 0, 0);
+				imgCopy.at<Vec3b>(Point(x,y)) = zero; // set pixel
+			}
 		}
 	}
 
@@ -213,245 +261,6 @@ Mat resize(Mat img, int *dims) {
     }
 
     return newImg;
-}
-
-/**
- * Normalize OK
- */
-Mat* normalize(Mat *images, int images_count) {
-	int minW = 100000, maxW = 0, minH = 100000, maxH = 0;
-
-	for(int i = 0; i < images_count; i++) {
-		if(images[i].cols < minW) minW = images[i].cols;
-		if(images[i].cols > maxW) maxW = images[i].cols;
-		if(images[i].rows < minH) minH = images[i].rows;
-		if(images[i].rows > maxH) maxH = images[i].rows;
-	}
-    
-	if(minW == maxW && minH == maxH) {
-		return images;
-	}
-	for(int i = 0; i < images_count; i++) {
-		images[i] = crop(images[i], 0, 0, minH, minW);
-	}
-
-	return images;
-}
-
-/**
- * Add OK
- */
-Mat add(Mat img1, Mat img2) {
-    Mat *images = new Mat[2];
-    images[0] = convertToBGR(img1);
-    images[1] = convertToBGR(img2);
-	images = normalize(images, 2);
-
-	Mat a = images[0], b = images[1];
-	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
-
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
-			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
-
-			Vec3b & color = img.at<Vec3b>(y,x);
-			color[0] = vcap(a_color[0] + b_color[0]);
-			color[1] = vcap(a_color[1] + b_color[1]);
-			color[2] = vcap(a_color[2] + b_color[2]);
-			img.at<Vec3b>(Point(x,y)) = color; // set pixel
-        }
-    }
-
-	return img;
-}
-
-/**
- * Product OK
- */
-Mat product(Mat img1, Mat img2) {
-	Mat *images = new Mat[2];
-    images[0] = convertToBGR(img1);
-    images[1] = convertToBGR(img2);
-	images = normalize(images, 2);
-
-	Mat a = images[0], b = images[1];
-	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
-    
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
-			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
-
-			Vec3b & color = img.at<Vec3b>(y,x);
-			color[0] = vcap(a_color[0] * static_cast<float>(b_color[0]) / 255);
-			color[1] = vcap(a_color[1] * static_cast<float>(b_color[1]) / 255);
-			color[2] = vcap(a_color[2] * static_cast<float>(b_color[2]) / 255);
-			img.at<Vec3b>(Point(x,y)) = color; // set pixel
-        }
-    }
-
-	return img;
-}
-
-/**
- * Difference OK
- */
-Mat diff(Mat img1, Mat img2) {
-	Mat *images = new Mat[2];
-    images[0] = convertToBGR(img1);
-    images[1] = convertToBGR(img2);
-	images = normalize(images, 2);
-
-	Mat a = images[0], b = images[1];
-	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
-
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
-			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
-
-			Vec3b & color = img.at<Vec3b>(y,x);
-			color[0] = vcap(a_color[0] - b_color[0]);
-			color[1] = vcap(a_color[1] - b_color[1]);
-			color[2] = vcap(a_color[2] - b_color[2]);
-			img.at<Vec3b>(Point(x,y)) = color; // set pixel
-        }
-    }
-
-	return img;
-}
-
-/**
- * Binary merge OK
- */
-Mat binaryMerge(Mat img1, Mat img2, Mat mask) {
-	Mat *images = new Mat[2];
-    images[0] = convertToBGR(img1);
-    images[1] = convertToBGR(img2);
-	images = normalize(images, 2);
-
-	Mat a = images[0], b = images[1];
-	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
-
-    mask = convertToGS(mask);
-    int *dims = new int[2];
-    dims[0] = img.rows;
-    dims[1] = img.cols;
-    mask = resize(mask, dims);
-
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
-			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
-
-			Vec3b & color = img.at<Vec3b>(y,x);
-			if(mask.at<uchar>(y,x) == 0) {
-				color[0] = a_color[0];
-				color[1] = a_color[1];
-				color[2] = a_color[2];
-			}
-			else {
-				color[0] = b_color[0];
-				color[1] = b_color[1];
-				color[2] = b_color[2];
-			}
-			img.at<Vec3b>(Point(x,y)) = color; // set pixel
-        }
-    }
-
-	return img;
-}
-
-/**
- * Weighted merge OK
- */
-Mat weightedMerge(Mat img1, Mat img2, Mat mask) {
-	Mat *images = new Mat[2];
-    images[0] = convertToBGR(img1);
-    images[1] = convertToBGR(img2);
-	images = normalize(images, 2);
-
-	Mat a = images[0], b = images[1];
-	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
-
-    mask = convertToGS(mask);
-    int *dims = new int[2];
-    dims[0] = img.rows;
-    dims[1] = img.cols;
-    mask = resize(mask, dims);
-    
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
-			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
-
-			Vec3b & color = img.at<Vec3b>(y,x);
-			color[0] = vcap(a_color[0] * (static_cast<float>(mask.at<uchar>(y,x))/255) + b_color[0] * static_cast<float>(1-(mask.at<uchar>(y,x)/255)));
-			color[1] = vcap(a_color[1] * (static_cast<float>(mask.at<uchar>(y,x))/255) + b_color[1] * static_cast<float>(1-(mask.at<uchar>(y,x)/255)));
-			color[2] = vcap(a_color[2] * (static_cast<float>(mask.at<uchar>(y,x))/255) + b_color[2] * static_cast<float>(1-(mask.at<uchar>(y,x)/255)));
-			img.at<Vec3b>(Point(x,y)) = color; // set pixel
-        }
-    }
-
-	return img;
-}
-
-/**
- * Screen OK
- */
-Mat screen(Mat img1, Mat img2) {
-	Mat *images = new Mat[2];
-    images[0] = convertToBGR(img1);
-    images[1] = convertToBGR(img2);
-	images = normalize(images, 2);
-
-	Mat a = images[0], b = images[1];
-	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
-
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
-			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
-
-			Vec3b & color = img.at<Vec3b>(y,x);
-			color[0] = vcap(255 - (255-a_color[0]) * (255-b_color[0]) /255);
-			color[1] = vcap(255 - (255-a_color[1]) * (255-b_color[1]) /255);
-			color[2] = vcap(255 - (255-a_color[2]) * (255-b_color[2]) /255);
-			img.at<Vec3b>(Point(x,y)) = color; // set pixel
-        }
-    }
-
-	return img;
-}
-
-/**
- * Overlay OK
- */
-Mat overlay(Mat img1, Mat img2) {
-	Mat *images = new Mat[2];
-    images[0] = convertToBGR(img1);
-    images[1] = convertToBGR(img2);
-	images = normalize(images, 2);
-
-	Mat a = images[0], b = images[1];
-	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
-	Mat img_screen = screen(a, b);
-    Mat img_product = product(a, b);
-
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-            Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
-			int avg = (a_color[0] + a_color[1] + a_color[2])/3;
-			if(avg < 128) { // product
-                img.at<Vec3b>(Point(x,y)) = img_product.at<Vec3b>(y,x); // set pixel
-			}
-			else { // screen
-				img.at<Vec3b>(Point(x,y)) = img_screen.at<Vec3b>(y,x); // set pixel
-			}
-        }
-    }
-	return img;
 }
 
 /**
@@ -539,49 +348,241 @@ Mat dilate(Mat img, int radius) {
 }
 
 /**
- * Generic rotate OK
+ * Normalize OK
  */
-Mat rotate(Mat img, int angle, int *center) {
-    img = convertToBGR(img);
-	Mat imgCopy = img.clone();
+Mat* normalize(Mat *images, int images_count) {
+	int minW = 100000, maxW = 0, minH = 100000, maxH = 0;
 
-	float ct = cos(-angle);
-	float st = sin(-angle);
-	for(int y = 0; y < img.rows; y++) {
-		for(int x = 0; x < img.cols; x++) {
-			int a = center[0]+static_cast<int>(ct*(x-center[0])-st*(y-center[1]));
-			int b = center[0]+static_cast<int>(st*(x-center[0])+ct*(y-center[1]));
-			if(a >= 0 && a < img.cols && b >= 0 && b < img.rows) {
-				imgCopy.at<Vec3b>(Point(x,y)) = img.at<Vec3b>(b,a); // set pixel
-			}
-			else {
-				Vec3b zero(0, 0, 0);
-				imgCopy.at<Vec3b>(Point(x,y)) = zero; // set pixel
-			}
-		}
+	for(int i = 0; i < images_count; i++) {
+		if(images[i].cols < minW) minW = images[i].cols;
+		if(images[i].cols > maxW) maxW = images[i].cols;
+		if(images[i].rows < minH) minH = images[i].rows;
+		if(images[i].rows > maxH) maxH = images[i].rows;
+	}
+    
+	if(minW == maxW && minH == maxH) {
+		return images;
+	}
+	for(int i = 0; i < images_count; i++) {
+		images[i] = crop(images[i], 0, 0, minH, minW);
 	}
 
-	return imgCopy;
+	return images;
 }
 
 /**
- * Threshold OK
+ * Add OK
  */
-Mat threshold(Mat img, int t) {
-    img = convertToBGR(img);
-    t = vcap(t);
+Mat add(Mat img1, Mat img2) {
+    Mat *images = new Mat[2];
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
+	images = normalize(images, 2);
+
+	Mat a = images[0], b = images[1];
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
 
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
-            Vec3b & color = img.at<Vec3b>(y,x); // get pixel
-			int avg = (color[0] + color[1] + color[2])/3;
-			if(avg > t) {
-                img.at<Vec3b>(Point(x,y)) = Vec3b(255, 255, 255); // set pixel to white
+			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
+			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
+
+			Vec3b & color = img.at<Vec3b>(y,x);
+			color[0] = vcap(a_color[0] + b_color[0]);
+			color[1] = vcap(a_color[1] + b_color[1]);
+			color[2] = vcap(a_color[2] + b_color[2]);
+			img.at<Vec3b>(Point(x,y)) = color; // set pixel
+        }
+    }
+
+	return img;
+}
+
+/**
+ * Difference OK
+ */
+Mat diff(Mat img1, Mat img2) {
+	Mat *images = new Mat[2];
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
+	images = normalize(images, 2);
+
+	Mat a = images[0], b = images[1];
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
+
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
+			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
+
+			Vec3b & color = img.at<Vec3b>(y,x);
+			color[0] = vcap(a_color[0] - b_color[0]);
+			color[1] = vcap(a_color[1] - b_color[1]);
+			color[2] = vcap(a_color[2] - b_color[2]);
+			img.at<Vec3b>(Point(x,y)) = color; // set pixel
+        }
+    }
+
+	return img;
+}
+
+/**
+ * Product OK
+ */
+Mat product(Mat img1, Mat img2) {
+	Mat *images = new Mat[2];
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
+	images = normalize(images, 2);
+
+	Mat a = images[0], b = images[1];
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
+    
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
+			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
+
+			Vec3b & color = img.at<Vec3b>(y,x);
+			color[0] = vcap(a_color[0] * static_cast<float>(b_color[0]) / 255);
+			color[1] = vcap(a_color[1] * static_cast<float>(b_color[1]) / 255);
+			color[2] = vcap(a_color[2] * static_cast<float>(b_color[2]) / 255);
+			img.at<Vec3b>(Point(x,y)) = color; // set pixel
+        }
+    }
+
+	return img;
+}
+
+/**
+ * Screen OK
+ */
+Mat screen(Mat img1, Mat img2) {
+	Mat *images = new Mat[2];
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
+	images = normalize(images, 2);
+
+	Mat a = images[0], b = images[1];
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
+
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
+			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
+
+			Vec3b & color = img.at<Vec3b>(y,x);
+			color[0] = vcap(255 - (255-a_color[0]) * (255-b_color[0]) /255);
+			color[1] = vcap(255 - (255-a_color[1]) * (255-b_color[1]) /255);
+			color[2] = vcap(255 - (255-a_color[2]) * (255-b_color[2]) /255);
+			img.at<Vec3b>(Point(x,y)) = color; // set pixel
+        }
+    }
+
+	return img;
+}
+
+/**
+ * Overlay OK
+ */
+Mat overlay(Mat img1, Mat img2) {
+	Mat *images = new Mat[2];
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
+	images = normalize(images, 2);
+
+	Mat a = images[0], b = images[1];
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
+	Mat img_screen = screen(a, b);
+    Mat img_product = product(a, b);
+
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+            Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
+			int avg = (a_color[0] + a_color[1] + a_color[2])/3;
+			if(avg < 128) { // product
+                img.at<Vec3b>(Point(x,y)) = img_product.at<Vec3b>(y,x); // set pixel
 			}
-			else {
-				img.at<Vec3b>(Point(x,y)) = Vec3b(0, 0, 0); // set pixel to black
+			else { // screen
+				img.at<Vec3b>(Point(x,y)) = img_screen.at<Vec3b>(y,x); // set pixel
 			}
         }
     }
 	return img;
 }
+
+/**
+ * Binary merge OK
+ */
+Mat binaryMerge(Mat img1, Mat img2, Mat mask) {
+	Mat *images = new Mat[2];
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
+	images = normalize(images, 2);
+
+	Mat a = images[0], b = images[1];
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
+
+    mask = convertToGS(mask);
+    int *dims = new int[2];
+    dims[0] = img.rows;
+    dims[1] = img.cols;
+    mask = resize(mask, dims);
+
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
+			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
+
+			Vec3b & color = img.at<Vec3b>(y,x);
+			if(mask.at<uchar>(y,x) == 0) {
+				color[0] = a_color[0];
+				color[1] = a_color[1];
+				color[2] = a_color[2];
+			}
+			else {
+				color[0] = b_color[0];
+				color[1] = b_color[1];
+				color[2] = b_color[2];
+			}
+			img.at<Vec3b>(Point(x,y)) = color; // set pixel
+        }
+    }
+
+	return img;
+}
+
+/**
+ * Weighted merge OK
+ */
+Mat weightedMerge(Mat img1, Mat img2, Mat mask) {
+	Mat *images = new Mat[2];
+    images[0] = convertToBGR(img1);
+    images[1] = convertToBGR(img2);
+	images = normalize(images, 2);
+
+	Mat a = images[0], b = images[1];
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
+
+    mask = convertToGS(mask);
+    int *dims = new int[2];
+    dims[0] = img.rows;
+    dims[1] = img.cols;
+    mask = resize(mask, dims);
+    
+	for(int y = 0; y < img.rows; y++) {
+		for(int x = 0; x < img.cols; x++) {
+			Vec3b & a_color = a.at<Vec3b>(y,x); // get pixel
+			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
+
+			Vec3b & color = img.at<Vec3b>(y,x);
+			color[0] = vcap(a_color[0] * (static_cast<float>(mask.at<uchar>(y,x))/255) + b_color[0] * static_cast<float>(1-(mask.at<uchar>(y,x)/255)));
+			color[1] = vcap(a_color[1] * (static_cast<float>(mask.at<uchar>(y,x))/255) + b_color[1] * static_cast<float>(1-(mask.at<uchar>(y,x)/255)));
+			color[2] = vcap(a_color[2] * (static_cast<float>(mask.at<uchar>(y,x))/255) + b_color[2] * static_cast<float>(1-(mask.at<uchar>(y,x)/255)));
+			img.at<Vec3b>(Point(x,y)) = color; // set pixel
+        }
+    }
+
+	return img;
+}
+

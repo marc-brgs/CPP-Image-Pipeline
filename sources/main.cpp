@@ -162,17 +162,6 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-		else if(command_id == "invert") { // ex: invert img1
-            checkLength(action, 2);
-
-			string image_name = action[1];
-			Mat& img = getImage(image_name);
-
-			img = invert(img);
-
-            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
-            showImage(title, img);
-        }
 		else if(command_id == "contrast") { // ex: contrast img1 40
             checkLength(action, 3);
 
@@ -197,6 +186,29 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
 		}
+        else if(command_id == "threshold") { // ex: threshold img1 180
+            checkLength(action, 3);
+
+			string image_name = action[1];
+			int t = stoi(action[2]);
+			Mat& img = getImage(image_name);
+
+			img = threshold(img, t);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
+        else if(command_id == "invert") { // ex: invert img1
+            checkLength(action, 2);
+
+			string image_name = action[1];
+			Mat& img = getImage(image_name);
+
+			img = invert(img);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
 		else if(command_id == "horizontal_flip") { // ex: horizontal_flip img1
 			checkLength(action, 2);
 
@@ -229,7 +241,22 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
 		}
-        else if(command_id == "crop") { // ex: crop img1 100 100 100 100
+        else if(command_id == "rotate") { // rotate img1 45 0 0
+            checkLength(action, 5);
+
+            string image_name = action[1];
+            int angle = stoi(action[2]);
+            int *center = new int[2];
+            center[0] = stoi(action[3]);
+            center[1] = stoi(action[4]);
+
+            Mat& img = getImage(image_name);
+            img = rotate(img, angle, center);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
+            showImage(title, img);
+        }
+        else if(command_id == "crop") { // ex: crop img1 100 100 200 200
             checkLength(action, 6);
 
             string image_name = action[1];
@@ -286,45 +313,6 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-        else if(command_id == "add") { // ex: add img1 img2
-            checkLength(action, 3);
-
-            string image_name1 = action[1];
-            string image_name2 = action[2];
-
-            Mat& img1 = getImage(image_name1);
-            Mat& img2 = getImage(image_name2);
-            img1 = add(img1, img2);
-
-            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
-            showImage(title, img1);
-        }
-        else if(command_id == "product") { // ex: product img1 img2
-            checkLength(action, 3);
-
-            string image_name1 = action[1];
-            string image_name2 = action[2];
-
-            Mat& img1 = getImage(image_name1);
-            Mat& img2 = getImage(image_name2);
-            img1 = product(img1, img2);
-
-            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
-            showImage(title, img1);
-        }
-        else if(command_id == "diff") { // ex: diff img1 img2
-            checkLength(action, 3);
-
-            string image_name1 = action[1];
-            string image_name2 = action[2];
-
-            Mat& img1 = getImage(image_name1);
-            Mat& img2 = getImage(image_name2);
-            img1 = diff(img1, img2);
-
-            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
-            showImage(title, img1);
-        }
         else if(command_id == "blur") { // ex: blur img1 5
             checkLength(action, 3);
 
@@ -361,32 +349,41 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
         }
-        else if(command_id == "binary_merge") { // ex: binary_merge img1 img2 mask
-            checkLength(action, 4);
+        else if(command_id == "add") { // ex: add img1 img2
+            checkLength(action, 3);
 
             string image_name1 = action[1];
             string image_name2 = action[2];
-            string mask_name = action[3];
 
             Mat& img1 = getImage(image_name1);
             Mat& img2 = getImage(image_name2);
-            Mat& mask = getImage(mask_name);
-            img1 = binaryMerge(img1, img2, mask);
+            img1 = add(img1, img2);
 
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
-        else if(command_id == "weighted_merge") { // ex: weighted_merge img1 img2 mask
-            checkLength(action, 4);
+        else if(command_id == "diff") { // ex: diff img1 img2
+            checkLength(action, 3);
 
             string image_name1 = action[1];
             string image_name2 = action[2];
-            string mask_name = action[3];
 
             Mat& img1 = getImage(image_name1);
             Mat& img2 = getImage(image_name2);
-            Mat& mask = getImage(mask_name);
-            img1 = weightedMerge(img1, img2, mask);
+            img1 = diff(img1, img2);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
+        }
+        else if(command_id == "product") { // ex: product img1 img2
+            checkLength(action, 3);
+
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            img1 = product(img1, img2);
 
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
@@ -417,32 +414,35 @@ int main(int argc, char** argv) {
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
             showImage(title, img1);
         }
-        else if(command_id == "rotate") { // rotate img1 45 0 0
-            checkLength(action, 5);
+        else if(command_id == "binary_merge") { // ex: binary_merge img1 img2 mask
+            checkLength(action, 4);
 
-            string image_name = action[1];
-            int angle = stoi(action[2]);
-            int *center = new int[2];
-            center[0] = stoi(action[3]);
-            center[1] = stoi(action[4]);
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+            string mask_name = action[3];
 
-            Mat& img = getImage(image_name);
-            img = rotate(img, angle, center);
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            Mat& mask = getImage(mask_name);
+            img1 = binaryMerge(img1, img2, mask);
 
-            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
-            showImage(title, img);
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
         }
-        else if(command_id == "threshold") { // ex: threshold img1 100
-            checkLength(action, 3);
+        else if(command_id == "weighted_merge") { // ex: weighted_merge img1 img2 mask
+            checkLength(action, 4);
 
-			string image_name = action[1];
-			int t = stoi(action[2]);
-			Mat& img = getImage(image_name);
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+            string mask_name = action[3];
 
-			img = threshold(img, t);
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            Mat& mask = getImage(mask_name);
+            img1 = weightedMerge(img1, img2, mask);
 
-            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
-            showImage(title, img);
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
         }
         else {
             printSubLineError("[!] Error : Unknown action in pipeline-steps.txt");
@@ -455,6 +455,7 @@ int main(int argc, char** argv) {
     cout << endl;
     return 0;
 }
+
 
 /**
  * Throw an error and end program if tokens number of action is different of size
