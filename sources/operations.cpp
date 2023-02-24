@@ -146,7 +146,7 @@ Mat rotate90(Mat img) {
 }
 
 /**
- * Untested
+ * OK
  */
 Mat crop(Mat img, int top, int left, int bottom, int right) {
 	Mat imgCrop(bottom-top, right-left, CV_8UC3, Scalar(255, 255, 255));
@@ -191,22 +191,24 @@ Mat resize(Mat img, int *dims) {
 }
 
 /**
- * Untested
+ * OK
  */
-Mat* normalize(Mat *images) {
-	/*int minW = 10000, maxW = 0, minH = 10000, maxH = 0;
-	for(int i = 0; i < sizeof(images); i++) {
+Mat* normalize(Mat *images, int images_count) {
+	int minW = 100000, maxW = 0, minH = 100000, maxH = 0;
+
+	for(int i = 0; i < images_count; i++) {
 		if(images[i].cols < minW) minW = images[i].cols;
 		if(images[i].cols > maxW) maxW = images[i].cols;
 		if(images[i].rows < minH) minH = images[i].rows;
 		if(images[i].rows > maxH) maxH = images[i].rows;
 	}
+    cout << minW << " " << minH;
 	if(minW == maxW && minH == maxH) {
 		return images;
 	}
-	for(int i = 0; i < sizeof(images); i++) {
-		images[i] = crop(images[i], 0, 0, minW, minH);
-	}*/
+	for(int i = 0; i < images_count; i++) {
+		images[i] = crop(images[i], 0, 0, minH, minW);
+	}
 
 	return images;
 }
@@ -218,10 +220,10 @@ Mat add(Mat img1, Mat img2) {
     Mat *images = new Mat[2];
     images[0] = img1;
     images[1] = img2;
-	images = normalize(images);
+	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
-	Mat img(a.cols, a.rows, CV_8UC3, Scalar(255, 255, 255));
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
 
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
@@ -246,10 +248,10 @@ Mat product(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
     images[0] = img1;
     images[1] = img2;
-	images = normalize(images);
+	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
-	Mat img(a.cols, a.rows, CV_8UC3, Scalar(255, 255, 255));
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
 
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
@@ -257,9 +259,9 @@ Mat product(Mat img1, Mat img2) {
 			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
 
 			Vec3b & color = img.at<Vec3b>(y,x);
-			color[0] = static_cast<int>(a_color[0] * b_color[0] / 255);
-			color[1] = static_cast<int>(a_color[1] * b_color[1] / 255);
-			color[2] = static_cast<int>(a_color[2] * b_color[2] / 255);
+			color[0] = vcap(a_color[0] * b_color[0] / 255);
+			color[1] = vcap(a_color[1] * b_color[1] / 255);
+			color[2] = vcap(a_color[2] * b_color[2] / 255);
 			img.at<Vec3b>(Point(x,y)) = color; // set pixel
         }
     }
@@ -268,16 +270,16 @@ Mat product(Mat img1, Mat img2) {
 }
 
 /**
- * Untested
+ * OK
  */
 Mat diff(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
     images[0] = img1;
     images[1] = img2;
-	images = normalize(images);
+	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
-	Mat img(a.cols, a.rows, CV_8UC3, Scalar(255, 255, 255));
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
 
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
@@ -285,9 +287,9 @@ Mat diff(Mat img1, Mat img2) {
 			Vec3b & b_color = b.at<Vec3b>(y,x); // get pixel
 
 			Vec3b & color = img.at<Vec3b>(y,x);
-			color[0] = a_color[0] - b_color[0];
-			color[1] = a_color[1] - b_color[1];
-			color[2] = a_color[2] - b_color[2];
+			color[0] = vcap(a_color[0] - b_color[0]);
+			color[1] = vcap(a_color[1] - b_color[1]);
+			color[2] = vcap(a_color[2] - b_color[2]);
 			img.at<Vec3b>(Point(x,y)) = color; // set pixel
         }
     }
@@ -302,10 +304,10 @@ Mat binaryMerge(Mat img1, Mat img2, Mat mask) {
 	Mat *images = new Mat[2];
     images[0] = img1;
     images[1] = img2;
-	images = normalize(images);
+	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
-	Mat img(a.cols, a.rows, CV_8UC3, Scalar(255, 255, 255));
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
 
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
@@ -337,10 +339,10 @@ Mat weightedMerge(Mat img1, Mat img2, Mat mask) {
 	Mat *images = new Mat[2];
     images[0] = img1;
     images[1] = img2;
-	images = normalize(images);
+	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
-	Mat img(a.cols, a.rows, CV_8UC3, Scalar(255, 255, 255));
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
 
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
@@ -366,10 +368,10 @@ Mat screen(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
     images[0] = img1;
     images[1] = img2;
-	images = normalize(images);
+	images = normalize(images, 2);
 
 	Mat a = images[0], b = images[1];
-	Mat img(a.cols, a.rows, CV_8UC3, Scalar(255, 255, 255));
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
 
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {
@@ -388,15 +390,15 @@ Mat screen(Mat img1, Mat img2) {
 }
 
 /**
- * ERROR
+ * ERROR at build
  */
 /*Mat overlay(Mat img1, Mat img2) {
 	Mat *images = new Mat[2];
     images[0] = img1;
     images[1] = img2;
-	images = normalize(images);
+	images = normalize(images, 2);
 	Mat a = images[0], b = images[1];
-	Mat img(a.cols, a.rows, CV_8UC3, Scalar(255, 255, 255));
+	Mat img(a.rows, a.cols, CV_8UC3, Scalar(255, 255, 255));
 	Mat screen = screen(a, b);
 	for(int y = 0; y < img.rows; y++) {
 		for(int x = 0; x < img.cols; x++) {

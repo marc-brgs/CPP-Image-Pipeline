@@ -4,7 +4,7 @@ load images/harry-potter-akimbo.png as img3
 load images/uganda-army.png as img4
 
 brightness img1 40
-invert img3
+//invert img3
 save img1 as images/result1.png
 brightness img2 -100
 invert img2
@@ -13,5 +13,7 @@ saturate img1 -100
 horizontal_flip img1
 vertical_flip img2
 rotate_90 img1
-crop img4 50 300 350 650
+//crop img4 50 300 350 650
+add img1 img2
+diff img4 img3
 save img2 as images/result2.png

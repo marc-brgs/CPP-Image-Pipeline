@@ -19,7 +19,14 @@ Mat horizontalFlip(Mat img);
 Mat verticalFlip(Mat img);
 Mat rotate90(Mat img);
 Mat crop(Mat img, int top, int left, int bottom, int right);
+Mat translate(Mat img, int *dec);
+Mat resize(Mat img, int *dims);
+Mat* normalize(Mat *images, int images_count);
 Mat add(Mat img1, Mat img2);
 Mat product(Mat img1, Mat img2);
+Mat diff(Mat img1, Mat img2);
+Mat binaryMerge(Mat img1, Mat img2, Mat mask);
+Mat weightedMerge(Mat img1, Mat img2, Mat mask);
+Mat screen(Mat img1, Mat img2);
 
 #endif

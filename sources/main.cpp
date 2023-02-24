@@ -198,7 +198,7 @@ int main(int argc, char** argv) {
 			Mat& img = getImage(image_name);
 			img = rotate90(img);
             
-            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + action.at(1);
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
 		}
         else if(action_id == "crop") { // ex: crop img1 100 100 100 100
@@ -208,6 +208,7 @@ int main(int argc, char** argv) {
             int dims[4] = {stoi(action[2]), stoi(action[3]), stoi(action[4]), stoi(action[5])}; // top left bottom right
 
             Mat& img = getImage(image_name);
+            // force dims inside image bounds
             for(int i = 0; i < 4; i++) {
                 if(dims[i] < 0)
                     dims[i] = 0;
@@ -219,15 +220,54 @@ int main(int argc, char** argv) {
                 if(dims[i] > extremum) dims[i] = extremum;
             }
 
-            if(dims[0] >= dims[2] || dims[1] >= dims[3]) { // arguments coherence
+            if(dims[0] >= dims[2] || dims[1] >= dims[3]) { // check arguments coherence
                 printSubLineError("[!] Error : crop command arguments top and left cannot be lower or equal than bottom and right (top left bottom right)");
                 return 0;
             }
 
             img = crop(img, dims[0], dims[1], dims[2], dims[3]); // top left bottom right
 
-            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + action.at(1);
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
+        }
+        else if(action_id == "add") { // ex: add img1 img2
+            checkLength(action, 3);
+
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            img1 = add(img1, img2);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
+        }
+        else if(action_id == "product") { // ex: product img1 img2
+            checkLength(action, 3);
+
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            img1 = product(img1, img2);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
+        }
+        else if(action_id == "diff") { // ex: product img1 img2
+            checkLength(action, 3);
+
+            string image_name1 = action[1];
+            string image_name2 = action[2];
+
+            Mat& img1 = getImage(image_name1);
+            Mat& img2 = getImage(image_name2);
+            img1 = diff(img1, img2);
+
+            string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name1;
+            showImage(title, img1);
         }
         else {
             printSubLineError("[!] Error : Unknown action in pipeline-steps.txt");
