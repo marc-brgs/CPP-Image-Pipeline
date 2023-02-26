@@ -35,7 +35,7 @@ Add mingw folder of the following link to C:\...\opencv\build\x64\mingw\build\x6
 
 ## Installation check
 
-You do not need to reboot your computer after installation.  
+You may need to reboot after CMake installation to make it work.  
 ```
 g++ --version
 cmake --version
