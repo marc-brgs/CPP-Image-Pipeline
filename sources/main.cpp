@@ -15,23 +15,114 @@
 using namespace std;
 using namespace cv;
 
-void printHeader();
-void printLine(string text);
-void printSubLine(string text);
-void printSubLineError(string text);
-void printSubLineDone(string text);
-
-void checkLength(vector<string> action, int size);
-Mat& getImage(string name);
-void showImage(string title, Mat img);
-
-
 // Global variables declaration
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-map<string, Mat> stored_images;
-map<string, string> images_path;
+
+class Pipeline {
+    public:
+        Pipeline(){};
+        int run();
+
+    private:
+        void printHeader();
+        void printLine(string text);
+        void printSubLine(string text);
+        void printSubLineError(string text);
+        void printSubLineDone(string text);
+        void checkLength(vector<string> action, int size);
+        Mat& getImage(string name);
+        void showImage(string title, Mat img);
+
+        map<string, Mat> stored_images;
+        map<string, string> images_path;
+};
 
 int main(int argc, char** argv) {
+    Pipeline p;
+    p.run();
+    return 0;
+}
+
+/**
+ * Throw an error and end program if tokens number of action is different of size
+ */
+void Pipeline::checkLength(vector<string> action, int size) {
+	if(action.size() != size) {
+		printSubLineError("[!] Error : "+ action.at(0) +" command should have "+ to_string(size) +" components");
+		exit(0);
+	}
+}
+
+/**
+ * Return image object corresponding to variable name declared in steps file
+ * Throw an error and end program if name unknown to program
+ */
+Mat& Pipeline::getImage(string name) {
+	auto it = stored_images.find(name);
+
+	if (it == stored_images.end()) {
+		printSubLineError("[!] Error : Image name "+ name +" not declared");
+		exit(0);
+	}
+
+	return it->second;
+}
+
+/**
+ * Show image in a new window and wait user click to resume code execution
+ */
+void Pipeline::showImage(string title, Mat img) {
+    namedWindow(title, CV_WINDOW_AUTOSIZE); // fit to the screen if too big
+    imshow(title, img);
+    waitKey(0);
+    destroyAllWindows();
+}
+
+void Pipeline::printHeader() {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 14);
+    cout << "*-------------------------------*" << endl;
+    cout << "|";
+    SetConsoleTextAttribute(hConsole, 224);
+    cout << "      Image Pipeline v0.1      ";
+    SetConsoleTextAttribute(hConsole, 14);
+    cout << "|" << endl;
+    cout << "*-------------------------------*" << endl << endl;
+}
+
+void Pipeline::printLine(string text) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, 14); // Set to light yellow
+    cout << "> ";
+    SetConsoleTextAttribute(hConsole, 15); // Set to white
+    cout << text << endl;
+}
+
+void Pipeline::printSubLine(string text) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, 14); // Set to light yellow
+    cout << " \\ ";
+    SetConsoleTextAttribute(hConsole, 15); // Set to white
+    cout << text << endl;
+}
+
+void Pipeline::printSubLineError(string text) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, 12); // Set to light red
+    cout << " \\ ";
+    cout << text << endl;
+    SetConsoleTextAttribute(hConsole, 15); // Set to white
+}
+
+void Pipeline::printSubLineDone(string text) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, 10); // Set to light green
+    cout << " \\ ";
+    cout << text << endl;
+    SetConsoleTextAttribute(hConsole, 15); // Set to white
+}
+
+int Pipeline::run() {
     // Program init and locate steps file
     printHeader();
 
@@ -237,7 +328,7 @@ int main(int argc, char** argv) {
 
 			Mat& img = getImage(image_name);
 			img = rotate90(img);
-            
+
             string title = "Step " + to_string(i+1) + "/" + to_string(lines_count) + " - " + image_name;
             showImage(title, img);
 		}
@@ -287,7 +378,7 @@ int main(int argc, char** argv) {
         }
         else if(command_id == "translate") { // ex: translate img1 40 40
             checkLength(action, 4);
-            
+
             string image_name = action[1];
             int *dec = new int[2];
             dec[0] = stoi(action[2]);
@@ -454,84 +545,4 @@ int main(int argc, char** argv) {
     printLine("Program end");
     cout << endl;
     return 0;
-}
-
-
-/**
- * Throw an error and end program if tokens number of action is different of size
- */
-void checkLength(vector<string> action, int size) {
-	if(action.size() != size) {
-		printSubLineError("[!] Error : "+ action.at(0) +" command should have "+ to_string(size) +" components");
-		exit(0);
-	}
-}
-
-/**
- * Return image object corresponding to variable name declared in steps file
- * Throw an error and end program if name unknown to program
- */
-Mat& getImage(string name) {
-	auto it = stored_images.find(name);
-    
-	if (it == stored_images.end()) {
-		printSubLineError("[!] Error : Image name "+ name +" not declared");
-		exit(0);
-	}
-
-	return it->second;
-}
-
-/**
- * Show image in a new window and wait user click to resume code execution
- */
-void showImage(string title, Mat img) {
-    namedWindow(title, CV_WINDOW_AUTOSIZE); // fit to the screen if too big
-    imshow(title, img);
-    waitKey(0);
-    destroyAllWindows();
-}
-
-void printHeader() {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, 14);
-    cout << "*-------------------------------*" << endl;
-    cout << "|";
-    SetConsoleTextAttribute(hConsole, 224);
-    cout << "      Image Pipeline v0.1      ";
-    SetConsoleTextAttribute(hConsole, 14);
-    cout << "|" << endl;
-    cout << "*-------------------------------*" << endl << endl;
-}
-
-void printLine(string text) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, 14); // Set to light yellow
-    cout << "> ";
-    SetConsoleTextAttribute(hConsole, 15); // Set to white
-    cout << text << endl;
-}
-
-void printSubLine(string text) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, 14); // Set to light yellow
-    cout << " \\ ";
-    SetConsoleTextAttribute(hConsole, 15); // Set to white
-    cout << text << endl;
-}
-
-void printSubLineError(string text) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, 12); // Set to light red
-    cout << " \\ ";
-    cout << text << endl;
-    SetConsoleTextAttribute(hConsole, 15); // Set to white
-}
-
-void printSubLineDone(string text) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, 10); // Set to light green
-    cout << " \\ ";
-    cout << text << endl;
-    SetConsoleTextAttribute(hConsole, 15); // Set to white
 }
