@@ -43,6 +43,7 @@ cmake --version
 
 ## Terminal commands
 
+The commands below must be executed in the project's `sources` folder.  
 - Construct project  
 ```
 cmake . -G "MinGW Makefiles"
